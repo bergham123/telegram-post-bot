@@ -1,0 +1,37 @@
+name: Generate RSS Feed
+
+on:
+  schedule:
+    # Run every hour
+    - cron: '0 * * * *'
+  
+  workflow_dispatch:
+  
+  push:
+    paths:
+      - 'data/processed/*.json'
+
+jobs:
+  generate-feed:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Generate RSS Feed
+      run: |
+        pip install feedgen
+        python scripts/generate_rss.py
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        publish_branch: gh-pages
